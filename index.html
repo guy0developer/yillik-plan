@@ -9,15 +9,24 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/html2canvas@1.4.1/dist/html2canvas.min.js" defer></script>
 <style>
-:root{--bg:#0b0d12;--panel:#0f1219;--muted:#8b90a2;--text:#eef2f7;--brand:#7c5cff;--glass:rgba(255,255,255,.06);--border:rgba(255,255,255,.12);--radius:16px;--shadow:0 12px 30px rgba(0,0,0,.35)}
+:root{
+  --bg:#0b0d12;--panel:#0f1219;--muted:#8b90a2;--text:#eef2f7;--brand:#7c5cff;
+  --glass:rgba(255,255,255,.06);--border:rgba(255,255,255,.12);
+  --radius:16px;--shadow:0 12px 30px rgba(0,0,0,.35);
+  -webkit-text-size-adjust:100%;
+}
 *{box-sizing:border-box}
 html,body{height:100%}
-body{margin:0;background:
+body{
+  margin:0;background:
   radial-gradient(1200px 800px at 85% -10%, rgba(124,92,255,.22), transparent 60%),
   radial-gradient(1000px 700px at -10% 20%, rgba(0,224,184,.16), transparent 60%),var(--bg);
-  color:var(--text);font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+  color:var(--text);font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;-webkit-font-smoothing:antialiased
+}
 .container{max-width:1260px;margin:0 auto;padding:20px}
-header{position:sticky;top:0;z-index:5;backdrop-filter:saturate(140%) blur(10px);background:linear-gradient(to bottom, rgba(11,13,18,.92), rgba(11,13,18,.55) 65%, transparent);border-bottom:1px solid var(--border)}
+header{position:sticky;top:0;z-index:5;backdrop-filter:saturate(140%) blur(10px);
+  background:linear-gradient(to bottom, rgba(11,13,18,.92), rgba(11,13,18,.55) 65%, transparent);
+  border-bottom:1px solid var(--border)}
 .header-row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
 .h-left h1{margin:0;font-size:clamp(20px,3.6vw,34px);letter-spacing:-.01em}
 .h-left .subtitle{margin:6px 0 0;color:var(--muted);font-size:14px}
@@ -28,7 +37,7 @@ header{position:sticky;top:0;z-index:5;backdrop-filter:saturate(140%) blur(10px)
 .btn-success{background:#18d4a3;border:none}
 .year-badge{min-width:88px;text-align:center;font-weight:800;letter-spacing:.06em;background:linear-gradient(135deg,var(--brand),#5f48ff);border:none}
 
-/* Grid: 3/2/1 ay */
+/* 3 / 2 / 1 ay */
 .months{display:grid;gap:18px;margin-top:18px;grid-template-columns:repeat(3,minmax(320px,1fr))}
 @media (max-width:1100px){.months{grid-template-columns:repeat(2,minmax(320px,1fr))}}
 @media (max-width:700px){.months{grid-template-columns:repeat(1,minmax(280px,1fr))}}
@@ -38,7 +47,7 @@ header{position:sticky;top:0;z-index:5;backdrop-filter:saturate(140%) blur(10px)
 .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;padding:12px}
 .wk{color:#c7cede;font-size:11px;opacity:.9;text-align:center;font-weight:600}
 
-/* Gün */
+/* Gün hücresi */
 .day{position:relative;height:78px;border:1px solid rgba(255,255,255,.1);border-radius:10px;cursor:pointer;transition:transform .06s ease,border-color .2s ease,box-shadow .2s ease;display:grid;grid-template-rows:1fr auto auto;align-items:center;justify-items:center;gap:4px;background:rgba(255,255,255,.02);padding-top:2px;padding-bottom:6px}
 .day:hover{transform:translateY(-1px);border-color:rgba(255,255,255,.22)}
 .dno{position:absolute;left:6px;top:4px;font-size:12px;color:#d7deea;opacity:.95;font-weight:700}
@@ -51,13 +60,19 @@ header{position:sticky;top:0;z-index:5;backdrop-filter:saturate(140%) blur(10px)
 footer{margin:30px 0 24px;color:#9aa4b8;text-align:center;font-size:12px}
 footer a{color:#c9d3ff;text-decoration:none;border-bottom:1px dashed rgba(201,211,255,.4)}
 
-/* Dialoglar + backdrop kontrast */
+/* Dialoglar */
 dialog{border:0;border-radius:18px;padding:0;background:var(--panel);color:var(--text);box-shadow:0 30px 80px rgba(0,0,0,.55)}
 dialog::backdrop{background:rgba(6,9,16,.62);backdrop-filter:blur(4px)}
 .modal-head{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
 .modal-body{padding:14px 16px;display:grid;gap:12px}
 label{font-size:12px;color:#cbd2df}
-input[type="text"],select,input[type="date"]{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:#11141b;color:var(--text)}
+
+/* iOS yakınlaştırma önleme: input/select 16px+ */
+input[type="text"],select,input[type="date"]{
+  width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--border);
+  background:#11141b;color:var(--text);font-size:16px; /* kritik */
+  -webkit-appearance:none;appearance:none;touch-action:manipulation;
+}
 .modal-actions{display:flex;justify-content:flex-end;gap:10px;padding:12px 16px;border-top:1px solid var(--border)}
 .btn-quiet{background:transparent;border:1px solid var(--border)}
 #summaryDlg{width:min(900px,95vw)} #rangeDlg{width:min(520px,92vw)} #helpDlg{width:min(640px,94vw)} #settingsDlg{width:min(640px,94vw)} #delDlg{width:min(420px,90vw)}
@@ -94,9 +109,9 @@ hr.sep{border:0;border-top:1px solid var(--border);margin:.25rem 0}
       <button class="btn" id="prevYear">‹</button>
       <div class="btn year-badge" id="yearLabel">YYYY</div>
       <button class="btn" id="nextYear">›</button>
-      <button class="btn" id="rangeBtn" title="Tarih aralığına toplu giriş">📍 Blok Ekle</button>
-      <button class="btn" id="helpBtn" title="Kullanım ipuçları">❔ Yardım</button>
-      <button class="btn" id="settingsBtn" title="Yedekleme (JSON)">⚙️ Ayarlar</button>
+      <button class="btn" id="rangeBtn" title="Tarih aralığına toplu giriş">📍 Blok</button>
+      <button class="btn" id="helpBtn" title="Yardım">❔</button>
+      <button class="btn" id="settingsBtn" title="Yedekleme">⚙️</button>
       <button class="btn btn-primary" id="summaryBtn" title="Kayıtlı tüm yılların özetini göster">📜 Özet</button>
     </div>
   </div>
@@ -139,7 +154,9 @@ hr.sep{border:0;border-top:1px solid var(--border);margin:.25rem 0}
       <div><label for="endDate">Bitiş</label><input id="endDate" type="date"/></div>
     </div>
     <div><label for="rangeCountrySel">Ülke</label><select id="rangeCountrySel"></select></div>
-    <div><label for="rangeCityInp">Şehir</label><input id="rangeCityInp" type="text" placeholder="Örn. Berlin"/></div>
+    <div><label for="rangeCityInp">Şehir</label>
+      <input id="rangeCityInp" type="text" placeholder="Örn. Berlin" inputmode="text" autocapitalize="words" autocomplete="off"/>
+    </div>
     <div class="small">Not: Aralık birden çok aya ve yıla yayılabilir. <strong>Boş / Ev</strong> seçerseniz günler temizlenir.</div>
   </div>
   <div class="modal-actions"><button id="rangeApplyBtn" class="btn btn-primary">Uygula</button></div>
@@ -167,19 +184,19 @@ hr.sep{border:0;border-top:1px solid var(--border);margin:.25rem 0}
       <li><strong>Dolu</strong> güne tıkla → silme onayı.</li>
       <li>Boş güne tıkla veya <strong>sürükle-bırak</strong> ile aralık seç → <em>Blok Ekle</em>.</li>
       <li><strong>Özet</strong>: Seçtiklerini <em>ICS</em> indir ya da <em>PNG</em> paylaş.</li>
-      <li><strong>Ayarlar</strong>: JSON dışa aktar / içe aktar.</li>
+      <li><strong>Yedekleme</strong>: Veriyi indir / veri yükle.</li>
     </ul>
   </div>
 </dialog>
 
-<!-- Ayarlar (yalnızca JSON yedek) -->
+<!-- Yedekleme -->
 <dialog id="settingsDlg">
   <div class="modal-head"><strong>Yedekleme</strong><button class="btn btn-quiet" onclick="settingsDlg.close()">Kapat</button></div>
   <div class="modal-body">
-    <div class="small">Tüm verilerini indir / içe aktar.</div>
+    <div class="small">Tüm verilerini indir veya yükle.</div>
     <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
-      <button class="btn" id="jsonExportBtn">JSON indir</button>
-      <button class="btn" id="jsonImportBtn">JSON içe aktar</button>
+      <button class="btn" id="jsonExportBtn">Veriyi indir</button>
+      <button class="btn" id="jsonImportBtn">Veri yükle</button>
       <input type="file" id="jsonFile" accept="application/json" style="display:none">
     </div>
   </div>
@@ -239,9 +256,9 @@ let currentYear=new Date().getFullYear();
 let yearData={};
 const storageKey=y=>`ylk-${y}`;
 
-/* ==== küçük yardımcılar (yerel tarih formatı) ==== */
+/* ==== tarih yardımcıları ==== */
 function pad(n){return String(n).padStart(2,'0')}
-function ymdLocal(d){return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`} // <-- UTC yok, yerel!
+function ymdLocal(d){return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`}
 function parseDate(s){const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)}
 
 /* ==== Yıl ==== */
@@ -281,7 +298,7 @@ function applyCellData(cell){
   if(data.city){const c=document.createElement('div');c.className='city';c.textContent=data.city;cell.appendChild(c)}
 }
 
-/* ==== Blok ekleme / drag-select ==== */
+/* ==== Blok ekle ==== */
 function applyRange(startStr,endStr,cc,city){
   if(!startStr||!endStr)return;
   let s=parseDate(startStr),e=parseDate(endStr); if(e<s){const t=s;s=e;e=t}
@@ -289,7 +306,7 @@ function applyRange(startStr,endStr,cc,city){
   for(let d=new Date(s);d<=e;d.setDate(d.getDate()+1)){
     const y=d.getFullYear();touchYears.add(y);
     const key=storageKey(y);const obj=JSON.parse(localStorage.getItem(key)||"{}");
-    const k=ymdLocal(d); // <-- artık yerel
+    const k=ymdLocal(d);
     if(!cc&&!city) delete obj[k]; else obj[k]={cc,city};
     localStorage.setItem(key,JSON.stringify(obj));
     if(y===currentYear){yearData[k]=obj[k]}
@@ -365,7 +382,7 @@ function exportICS(){
   lines.push('END:VCALENDAR');const blob=new Blob([lines.join('\r\n')],{type:'text/calendar;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='gezi-ozet.ics';a.click();URL.revokeObjectURL(a.href)
 }
 
-/* ==== JSON import/export ==== */
+/* ==== Veri indir / yükle ==== */
 function snapshotAll(){const obj={};for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith('ylk-'))obj[k]=JSON.parse(localStorage.getItem(k)||"{}")}return obj}
 function downloadJSON(){const blob=new Blob([JSON.stringify(snapshotAll(),null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='gezi-yedek.json';a.click();URL.revokeObjectURL(a.href)}
 function applyImportedData(obj){
@@ -395,7 +412,7 @@ toggleAll.addEventListener('change',()=>{sumList.querySelectorAll('input.pick').
 icsBtn.addEventListener('click',exportICS);
 jsonExportBtn.addEventListener('click',downloadJSON);
 jsonImportBtn.addEventListener('click',()=>jsonFile.click());
-jsonFile.addEventListener('change',async e=>{const f=e.target.files&&e.target.files[0]; if(!f) return; const txt=await f.text(); try{applyImportedData(JSON.parse(txt)); alert('Veri içe aktarıldı.')}catch{alert('Geçersiz JSON')}});
+jsonFile.addEventListener('change',async e=>{const f=e.target.files&&e.target.files[0]; if(!f) return; const txt=await f.text(); try{applyImportedData(JSON.parse(txt)); alert('Veri yüklendi.')}catch{alert('Dosya okunamadı')}});
 
 /* ==== İlk yükleme ==== */
 loadYear(new Date().getFullYear());
