@@ -1,0 +1,442 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>Yılın Hangi Günleri Neredeyim?</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🗓️</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0b0d12; --panel:#11141b; --muted:#8b90a2; --text:#eef2f7; --brand:#7c5cff;
+  --glass:rgba(255,255,255,.06); --border:rgba(255,255,255,.12); --radius:16px; --shadow:0 12px 30px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; background:
+    radial-gradient(1200px 800px at 85% -10%, rgba(124,92,255,.22), transparent 60%),
+    radial-gradient(1000px 700px at -10% 20%, rgba(0,224,184,.16), transparent 60%),
+    var(--bg);
+  color:var(--text); font-family:Inter, system-ui, Segoe UI, Roboto, Arial, sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+.container{max-width:1260px;margin:0 auto;padding:20px}
+header{position:sticky;top:0;z-index:5; backdrop-filter:saturate(140%) blur(10px);
+  background:linear-gradient(to bottom, rgba(11,13,18,.92), rgba(11,13,18,.55) 65%, transparent);
+  border-bottom:1px solid var(--border)}
+.header-row{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.h-left h1{margin:0;font-size:clamp(20px,3.6vw,34px);letter-spacing:-.01em}
+.h-left .subtitle{margin:6px 0 0;color:var(--muted);font-size:14px}
+.header-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.btn{
+  background:var(--glass); border:1px solid var(--border); color:var(--text); border-radius:12px;
+  padding:10px 12px; cursor:pointer; font-weight:700;
+}
+.btn:hover{filter:brightness(1.06)}
+.btn-primary{background:linear-gradient(135deg,var(--brand),#5f48ff); border:none}
+.year-badge{min-width:88px;text-align:center;font-weight:800;letter-spacing:.06em;background:linear-gradient(135deg,var(--brand),#5f48ff);border:none}
+
+.months{
+  display:grid; gap:18px; margin-top:18px;
+  grid-template-columns: repeat(3, minmax(320px, 1fr));
+}
+@media (max-width:1100px){ .months{grid-template-columns: repeat(2, minmax(320px, 1fr));} }
+@media (max-width:700px){ .months{grid-template-columns: repeat(1, minmax(280px, 1fr));} }
+
+.month{
+  background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+  border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow);
+  overflow:hidden; display:flex; flex-direction:column;
+}
+.m-head{padding:10px 14px;font-weight:800;letter-spacing:.02em;border-bottom:1px solid var(--border);background:rgba(255,255,255,.03)}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;padding:12px}
+.wk{color:#c7cede;font-size:11px;opacity:.9;text-align:center;font-weight:600}
+
+/* Hücre yüksekliği sabit: içerik gelse de kayma yok */
+.day{
+  position:relative; height:78px; border:1px solid rgba(255,255,255,.1);
+  border-radius:10px; cursor:pointer; transition:transform .06s ease, border-color .2s ease;
+  display:grid; grid-template-rows: 1fr auto auto; align-items:center; justify-items:center; gap:4px;
+  background:rgba(255,255,255,.02); padding-top:2px; padding-bottom:6px;
+}
+.day:hover{transform:translateY(-1px); border-color:rgba(255,255,255,.22)}
+.dno{position:absolute;left:6px;top:4px;font-size:12px;color:#d7deea;opacity:.95;font-weight:700}
+.day.disabled{opacity:.22;pointer-events:none}
+
+.flag{width:22px;height:auto;border-radius:3px;box-shadow:0 1px 0 rgba(0,0,0,.35)}
+.city{font-size:10px;line-height:1.1;max-width:100%;text-align:center;color:#e4e9f5;
+  padding:0 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* Footer */
+footer{margin:30px 0 24px;color:#9aa4b8;text-align:center;font-size:12px}
+footer a{color:#c9d3ff;text-decoration:none;border-bottom:1px dashed rgba(201,211,255,.4)}
+
+/* modal (edit) */
+dialog{border:0;border-radius:18px; padding:0; background:#0f1219; color:var(--text); box-shadow:0 30px 80px rgba(0,0,0,.55)}
+#editDlg{width:min(480px,92vw)}
+.modal-head{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.modal-body{padding:14px 16px;display:grid;gap:12px}
+label{font-size:12px;color:#cbd2df}
+input[type="text"], select{
+  width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--border); background:var(--panel); color:var(--text)
+}
+.modal-actions{display:flex;justify-content:flex-end;gap:10px;padding:12px 16px;border-top:1px solid var(--border)}
+.btn-quiet{background:transparent;border:1px solid var(--border)}
+.btn-danger{background:#ff6b6b;border:none}
+
+/* modal (summary) */
+#summaryDlg{width:min(860px,94vw)}
+.sum-wrap{padding:0 16px 16px}
+.sum-stats{display:flex;gap:8px;flex-wrap:wrap;padding:12px 16px 0}
+.stat{
+  padding:8px 10px;border-radius:999px;border:1px solid var(--border);background:var(--glass);font-size:12px;font-weight:700
+}
+.sum-list{max-height:60vh;overflow:auto;padding:10px 2px 16px}
+.group{margin:8px 0 12px}
+.group h4{margin:10px 0 6px 16px;color:#dbe3f5;font-size:13px;opacity:.9}
+.item{
+  display:flex;align-items:center;gap:10px;padding:10px 12px;margin:6px 8px;border:1px solid var(--border);
+  border-radius:12px;background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02))
+}
+.item .iflag{width:20px;border-radius:3px}
+.item .meta{display:flex;flex-direction:column;line-height:1.2}
+.item .title{font-weight:700;font-size:13px}
+.item .sub{font-size:12px;color:#c4ccdd}
+.sum-empty{padding:18px;color:#cbd5e7;text-align:center}
+</style>
+</head>
+<body>
+<header>
+  <div class="container header-row">
+    <div class="h-left">
+      <h1>Yılın Hangi Günleri Neredeyim?</h1>
+      <p class="subtitle">Bir güne tıkla → ülkeyi seç → şehri yaz → <strong>Kaydet</strong>.</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn" id="prevYear" aria-label="Önceki yıl">‹</button>
+      <div class="btn year-badge" id="yearLabel">YYYY</div>
+      <button class="btn" id="nextYear" aria-label="Sonraki yıl">›</button>
+      <button class="btn btn-primary" id="summaryBtn" title="Kayıtlı tüm yılların özetini göster">📜 Özet</button>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+  <section id="months" class="months" aria-live="polite"></section>
+</main>
+
+<footer>Developed by <a href="https://github.com/eylmz" target="_blank" rel="noreferrer">eylmz</a></footer>
+
+<!-- Gün düzenleme modalı -->
+<dialog id="editDlg">
+  <div class="modal-head">
+    <strong id="dlgTitle">Gün Düzenle</strong>
+    <button class="btn btn-quiet" onclick="document.getElementById('editDlg').close()">Kapat</button>
+  </div>
+  <div class="modal-body">
+    <div>
+      <label for="countrySel">Ülke</label>
+      <select id="countrySel"></select>
+      <div style="color:#aab4c7;font-size:12px;margin-top:6px">“Boş / Ev” seçersen gün temizlenir.</div>
+    </div>
+    <div>
+      <label for="cityInp">Şehir</label>
+      <input id="cityInp" type="text" placeholder="Örn. Kopenhag"/>
+    </div>
+  </div>
+  <div class="modal-actions">
+    <button id="clearBtn" class="btn btn-danger">Temizle</button>
+    <button id="saveBtn" class="btn btn-primary">Kaydet</button>
+  </div>
+</dialog>
+
+<!-- Özet modalı -->
+<dialog id="summaryDlg">
+  <div class="modal-head">
+    <strong>Özet — Hangi Gün Neredeydim?</strong>
+    <button class="btn btn-quiet" onclick="document.getElementById('summaryDlg').close()">Kapat</button>
+  </div>
+  <div class="sum-wrap">
+    <div class="sum-stats" id="sumStats"></div>
+    <div class="sum-list" id="sumList"></div>
+  </div>
+</dialog>
+
+<script>
+(function(){ 'use strict';
+
+/* === 195 ÜLKE — ISO2 kod + ad (UN 193 + VA, PS) === */
+const COUNTRIES_RAW = [
+["af","Afganistan"],["al","Arnavutluk"],["dz","Cezayir"],["ad","Andorra"],["ao","Angola"],["ag","Antigua ve Barbuda"],
+["ar","Arjantin"],["am","Ermenistan"],["au","Avustralya"],["at","Avusturya"],["az","Azerbaycan"],
+["bs","Bahamalar"],["bh","Bahreyn"],["bd","Bangladeş"],["bb","Barbados"],["by","Belarus"],["be","Belçika"],
+["bz","Belize"],["bj","Benin"],["bt","Butan"],["bo","Bolivya"],["ba","Bosna-Hersek"],["bw","Botsvana"],
+["br","Brezilya"],["bn","Brunei"],["bg","Bulgaristan"],["bf","Burkina Faso"],["bi","Burundi"],
+["cv","Cabo Verde"],["kh","Kamboçya"],["cm","Kamerun"],["ca","Kanada"],["cf","Orta Afrika Cum."],
+["td","Çad"],["cl","Şili"],["cn","Çin"],["co","Kolombiya"],["km","Komorlar"],["cg","Kongo Cum."],
+["cr","Kosta Rika"],["ci","Fildişi Sahili"],["hr","Hırvatistan"],["cu","Küba"],["cy","Kıbrıs"],["cz","Çekya"],
+["cd","Kongo D.C. (DRC)"],["dk","Danimarka"],["dj","Cibuti"],["dm","Dominika"],["do","Dominik Cum."],
+["ec","Ekvador"],["eg","Mısır"],["sv","El Salvador"],["gq","Ekvator Ginesi"],["er","Eritre"],
+["ee","Estonya"],["sz","Esvatini"],["et","Etiyopya"],["fj","Fiji"],["fi","Finlandiya"],["fr","Fransa"],
+["ga","Gabon"],["gm","Gambiya"],["ge","Gürcistan"],["de","Almanya"],["gh","Gana"],["gr","Yunanistan"],
+["gd","Grenada"],["gt","Guatemala"],["gn","Gine"],["gw","Gine-Bissau"],["gy","Guyana"],
+["ht","Haiti"],["hn","Honduras"],["hu","Macaristan"],["is","İzlanda"],["in","Hindistan"],["id","Endonezya"],
+["ir","İran"],["iq","Irak"],["ie","İrlanda"],["il","İsrail"],["it","İtalya"],["jm","Jamaika"],["jp","Japonya"],
+["jo","Ürdün"],["kz","Kazakistan"],["ke","Kenya"],["ki","Kiribati"],["kw","Kuveyt"],["kg","Kırgızistan"],
+["la","Laos"],["lv","Letonya"],["lb","Lübnan"],["ls","Lesotho"],["lr","Liberya"],["ly","Libya"],
+["li","Lihtenştayn"],["lt","Litvanya"],["lu","Lüksemburg"],["mg","Madagaskar"],["mw","Malavi"],
+["my","Malezya"],["mv","Maldivler"],["ml","Mali"],["mt","Malta"],["mh","Marshall Adaları"],
+["mr","Moritanya"],["mu","Mauritius"],["mx","Meksika"],["fm","Mikronezya"],["md","Moldova"],
+["mc","Monako"],["mn","Moğolistan"],["me","Karadağ"],["ma","Fas"],["mz","Mozambik"],["mm","Myanmar"],
+["na","Namibya"],["nr","Nauru"],["np","Nepal"],["nl","Hollanda"],["nz","Yeni Zelanda"],["ni","Nikaragua"],
+["ne","Nijer"],["ng","Nijerya"],["kp","Kuzey Kore"],["mk","Kuzey Makedonya"],["no","Norveç"],
+["om","Umman"],["pk","Pakistan"],["pw","Palau"],["ps","Filistin Devleti"],["pa","Panama"],
+["pg","Papua Yeni Gine"],["py","Paraguay"],["pe","Peru"],["ph","Filipinler"],["pl","Polonya"],["pt","Portekiz"],
+["qa","Katar"],["ro","Romanya"],["ru","Rusya"],["rw","Ruanda"],["kn","Saint Kitts ve Nevis"],
+["lc","Saint Lucia"],["vc","Saint Vincent ve Grenadinler"],["ws","Samoa"],["sm","San Marino"],
+["st","Sao Tome ve Principe"],["sa","Suudi Arabistan"],["sn","Senegal"],["rs","Sırbistan"],
+["sc","Seyşeller"],["sl","Sierra Leone"],["sg","Singapur"],["sk","Slovakya"],["si","Slovenya"],
+["sb","Solomon Adaları"],["so","Somali"],["za","Güney Afrika"],["kr","Güney Kore"],["ss","Güney Sudan"],
+["es","İspanya"],["lk","Sri Lanka"],["sd","Sudan"],["sr","Surinam"],["se","İsveç"],["ch","İsviçre"],
+["sy","Suriye"],["tj","Tacikistan"],["tz","Tanzanya"],["th","Tayland"],["tl","Doğu Timor"],
+["tg","Togo"],["to","Tonga"],["tt","Trinidad ve Tobago"],["tn","Tunus"],["tr","Türkiye"],
+["tm","Türkmenistan"],["tv","Tuvalu"],["ug","Uganda"],["ua","Ukrayna"],["ae","BAE"],
+["gb","Birleşik Krallık"],["us","ABD"],["uy","Uruguay"],["uz","Özbekistan"],["vu","Vanuatu"],
+["va","Vatikan"],["ve","Venezuela"],["vn","Vietnam"],["ye","Yemen"],["zm","Zambiya"],["zw","Zimbabve"]
+];
+const COUNTRIES = [["","Boş / Ev"]].concat(
+  [...COUNTRIES_RAW].sort((a,b)=>a[1].localeCompare(b[1],"tr",{sensitivity:"base"}))
+);
+const COUNTRY_BY_CODE = COUNTRIES_RAW.reduce((a,[c,n]) => (a[c]=n,a), {});
+const flagURL = (code)=> code ? `https://flagcdn.com/w40/${code}.png` : "";
+
+/* DOM */
+const monthsEl = document.getElementById('months');
+const yearLbl = document.getElementById('yearLabel');
+const prevBtn = document.getElementById('prevYear');
+const nextBtn = document.getElementById('nextYear');
+const summaryBtn = document.getElementById('summaryBtn');
+const editDlg = document.getElementById('editDlg');
+const summaryDlg = document.getElementById('summaryDlg');
+const countrySel = document.getElementById('countrySel');
+const cityInp = document.getElementById('cityInp');
+const dlgTitle = document.getElementById('dlgTitle');
+const saveBtn = document.getElementById('saveBtn');
+const clearBtn = document.getElementById('clearBtn');
+const sumStats = document.getElementById('sumStats');
+const sumList = document.getElementById('sumList');
+countrySel.innerHTML = COUNTRIES.map(([c,n])=>`<option value="${c}">${n}</option>`).join('');
+
+/* state */
+let currentYear = new Date().getFullYear();
+let yearData = {};
+const storageKey = y => `ylk-${y}`;
+
+function loadYear(y){
+  currentYear = y;
+  yearData = JSON.parse(localStorage.getItem(storageKey(y)) || "{}");
+  yearLbl.textContent = y;
+  renderYear();
+}
+function saveYear(){
+  localStorage.setItem(storageKey(currentYear), JSON.stringify(yearData));
+}
+
+const lastDay = (y,m)=> new Date(y, m+1, 0).getDate();
+const dkey = (y,m,d)=> `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+
+function renderYear(){
+  monthsEl.innerHTML = "";
+  const WEEK = ["Pzt","Sal","Çar","Per","Cum","Cmt","Paz"];
+  const MONTHS = ["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"];
+
+  for(let m=0; m<12; m++){
+    const month = document.createElement('div');
+    month.className = 'month';
+
+    const mh = document.createElement('div');
+    mh.className = 'm-head';
+    mh.textContent = MONTHS[m];
+    month.appendChild(mh);
+
+    const cal = document.createElement('div');
+    cal.className = 'cal';
+
+    WEEK.forEach(w => {
+      const wk = document.createElement('div');
+      wk.className = 'wk';
+      wk.textContent = w;
+      cal.appendChild(wk);
+    });
+
+    let startIndex = new Date(currentYear, m, 1).getDay();
+    startIndex = (startIndex === 0) ? 6 : startIndex - 1; // Pzt başlangıç
+
+    for(let i=0;i<startIndex;i++){
+      const empty = document.createElement('div');
+      empty.className = 'day disabled';
+      cal.appendChild(empty);
+    }
+
+    const ld = lastDay(currentYear,m);
+    for(let d=1; d<=ld; d++){
+      const cell = document.createElement('div');
+      cell.className = 'day';
+      cell.dataset.date = dkey(currentYear,m,d);
+
+      const dno = document.createElement('div');
+      dno.className = 'dno';
+      dno.textContent = d;
+      cell.appendChild(dno);
+
+      applyCellData(cell);
+      cell.addEventListener('click', ()=> openEditor(cell.dataset.date));
+      cal.appendChild(cell);
+    }
+
+    month.appendChild(cal);
+    monthsEl.appendChild(month);
+  }
+}
+
+function applyCellData(cell){
+  [...cell.querySelectorAll('img.flag, .city')].forEach(e=>e.remove());
+  const data = yearData[cell.dataset.date];
+  if(!data) return;
+  if(data.cc){
+    const img = document.createElement('img');
+    img.className = 'flag';
+    img.alt = data.cc.toUpperCase();
+    img.referrerPolicy = "no-referrer";
+    img.loading = "lazy";
+    img.src = flagURL(data.cc);
+    cell.appendChild(img);
+  }
+  if(data.city){
+    const c = document.createElement('div');
+    c.className = 'city';
+    c.textContent = data.city;
+    cell.appendChild(c);
+  }
+}
+
+/* modal (edit) */
+let editingDate = null;
+function openEditor(dateStr){
+  editingDate = dateStr;
+  const ex = yearData[dateStr] || { cc:"", city:"" };
+  dlgTitle.textContent = new Date(dateStr).toLocaleDateString('tr-TR', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+  countrySel.value = ex.cc || "";
+  cityInp.value = ex.city || "";
+  editDlg.showModal();
+}
+saveBtn.addEventListener('click', ()=>{
+  if(!editingDate){ editDlg.close(); return; }
+  const cc = countrySel.value.trim();
+  const city = cityInp.value.trim();
+  if(!cc && !city) delete yearData[editingDate];
+  else yearData[editingDate] = { cc, city };
+  saveYear();
+  const cell = document.querySelector(`.day[data-date="${editingDate}"]`);
+  if(cell) applyCellData(cell);
+  editDlg.close();
+});
+clearBtn.addEventListener('click', ()=>{
+  if(!editingDate){ editDlg.close(); return; }
+  delete yearData[editingDate];
+  saveYear();
+  const cell = document.querySelector(`.day[data-date="${editingDate}"]`);
+  if(cell) applyCellData(cell);
+  editDlg.close();
+});
+
+/* ÖZET: tüm yılları localStorage'tan oku, sırala, grupla ve göster */
+function getAllEntries(){
+  const rows = [];
+  for(let i=0;i<localStorage.length;i++){
+    const k = localStorage.key(i);
+    if(!k || !k.startsWith('ylk-')) continue;
+    let obj;
+    try{ obj = JSON.parse(localStorage.getItem(k) || "{}"); }catch{ obj = {}; }
+    for(const date in obj){
+      if(!Object.prototype.hasOwnProperty.call(obj, date)) continue;
+      const v = obj[date];
+      if(!v || (!v.cc && !v.city)) continue;
+      // ISO tarih biçimi bekleniyor (YYYY-MM-DD)
+      rows.push({ date, cc: v.cc || "", city: v.city || "" });
+    }
+  }
+  // ISO string karşılaştırması yeterli
+  rows.sort((a,b)=> a.date.localeCompare(b.date));
+  return rows;
+}
+function renderSummary(){
+  const rows = getAllEntries();
+  sumStats.innerHTML = "";
+  sumList.innerHTML = "";
+
+  if(rows.length===0){
+    sumList.innerHTML = `<div class="sum-empty">Kayıt bulunamadı. Günlere tıklayarak ülke/şehir ekleyebilirsin.</div>`;
+    return;
+  }
+
+  // İstatistikler
+  const uniq = (arr)=>[...new Set(arr)];
+  const countryCount = uniq(rows.map(r=>r.cc).filter(Boolean)).length;
+  const cityCount = uniq(rows.map(r=>r.city).filter(Boolean).map(s=>s.toLowerCase())).length;
+  const years = uniq(rows.map(r=>r.date.slice(0,4)));
+  const chips = [
+    `Toplam Gün: ${rows.length}`,
+    `Ülke: ${countryCount}`,
+    `Şehir: ${cityCount}`,
+    `Yıllar: ${years.join(' · ')}`
+  ];
+  chips.forEach(t=>{
+    const s=document.createElement('div'); s.className='stat'; s.textContent=t; sumStats.appendChild(s);
+  });
+
+  // Grup: Yıl → Ay
+  const monthsTR = ["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"];
+  let currentGroupKey = "";
+  rows.forEach(r=>{
+    const y = r.date.slice(0,4);
+    const m = Number(r.date.slice(5,7))-1;
+    const gkey = `${y}-${String(m+1).padStart(2,'0')}`;
+    if(gkey !== currentGroupKey){
+      currentGroupKey = gkey;
+      const g = document.createElement('div'); g.className='group';
+      const h = document.createElement('h4'); h.textContent = `${y} · ${monthsTR[m]}`;
+      g.appendChild(h);
+      sumList.appendChild(g);
+    }
+    const d = new Date(r.date);
+    const lineDate = d.toLocaleDateString('tr-TR',{weekday:'long', day:'2-digit', month:'long', year:'numeric'});
+    const item = document.createElement('div'); item.className='item';
+    const flag = document.createElement('img'); flag.className='iflag'; flag.alt=r.cc.toUpperCase(); flag.loading='lazy';
+    flag.src = r.cc ? flagURL(r.cc) : '';
+    const meta = document.createElement('div'); meta.className='meta';
+    const title = document.createElement('div'); title.className='title';
+    title.textContent = (r.city || '—') + (r.cc ? ` — ${COUNTRY_BY_CODE[r.cc] || r.cc.toUpperCase()}` : '');
+    const sub = document.createElement('div'); sub.className='sub'; sub.textContent = lineDate;
+    meta.appendChild(title); meta.appendChild(sub);
+    item.appendChild(flag); item.appendChild(meta);
+    sumList.lastElementChild.appendChild(item);
+  });
+}
+
+/* yıl kontrol */
+prevBtn.addEventListener('click', ()=> loadYear(currentYear - 1));
+nextBtn.addEventListener('click', ()=> loadYear(currentYear + 1));
+
+/* özet açma */
+summaryBtn.addEventListener('click', ()=>{ renderSummary(); summaryDlg.showModal(); });
+
+/* başlangıç */
+loadYear(new Date().getFullYear());
+
+})();
+</script>
+</body>
+</html>
